@@ -16,11 +16,11 @@ pip3 install flask_jsonpify
 ## Start up Launch Windows app
 1. Clone to your local
     ```
-    git clone https://github.com/gitkent/lauchwindows.git
+    git clone https://github.com/gitkent/launchwindows.git
     ```
 2. Start the app
     ```
-    cd lauchwindows/
+    cd launchwindows/
     python api.py
     ```
 ## Access to Data
