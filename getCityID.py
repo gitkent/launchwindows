@@ -1,9 +1,9 @@
 def getCityID(c):
     switcher = {
-        'Mel':Mel(),
-        'Dar':Dar(),
-        'Hob':Hob(),
-        'Per':Per()
+        'Melbourne':Mel(),
+        'Darwin':Dar(),
+        'Hobart':Hob(),
+        'Perth':Per()
     }
     return switcher.get(c,All())
 
