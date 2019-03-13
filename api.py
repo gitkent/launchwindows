@@ -1,75 +1,32 @@
-import requests
-import getpass
-import json
-from operator import itemgetter
-from pprint import pprint
 from flask import Flask, request
 from flask_restful import Resource, Api
 from flask_jsonpify import jsonify
+from operator import itemgetter
 
 import getCityID
-import getScore
+import generateData
 
 class launchwindows(Resource):
   def get(self, city=None):
-    api_key = "2558ecc8196f8701fac72635245a8b09"
-    cityID = getCityID.getCityID(city)
+    api_key = request.args.get('key', None)
+    cityIDs = getCityID.getCityID(city)
 
-    if city is None:
-      d = []
+    l = []
+    if isinstance(cityIDs, list):
       i = 0
-      while i < len(cityID): ## for each city in cities
-        url = "https://api.openweathermap.org/data/2.5/forecast?id={ct}&appid={key}&units=metric".format(ct=cityID[i], key=api_key)
-        res = requests.get(url)
-        data = res.json()
-
-        city_name = data['city']['name']
-        weather_list = data['list']
-
-        index = 0
-        while index < len(weather_list):
-          temp = weather_list[index]['main']['temp']
-          speed = weather_list[index]['wind']['speed']
-          direction = weather_list[index]['wind']['deg']
-          datetime = weather_list[index]['dt_txt']
-          score = getScore.getScore(temp,speed,direction)
-          
-          tmp_dict = {}
-          tmp_dict["location"] = city_name
-          tmp_dict["datetime"] = datetime
-          tmp_dict["score"] = score
-          d.append(tmp_dict)
-          index += 1
+      while i < len(cityIDs): ## for each city in cities
+        url = "https://api.openweathermap.org/data/2.5/forecast?id={ct}&appid={key}&units=metric".format(ct=cityIDs[i], key=api_key)
+        all_data = generateData.generateData(cityIDs[i],url,l)
         i += 1
 
-      ordered_data = sorted(d, key=itemgetter('score')) 
+      ordered_data = sorted(all_data, key=itemgetter('score')) 
       result = {'launchWindows': [ordered_data[:5]]}
 
-    else:
-      url = "https://api.openweathermap.org/data/2.5/forecast?id={ct}&appid={key}&units=metric".format(ct=cityID, key=api_key)
-      res = requests.get(url)
-      data = res.json()
+    elif isinstance(cityIDs, str):
+      url = "https://api.openweathermap.org/data/2.5/forecast?id={ct}&appid={key}&units=metric".format(ct=cityIDs, key=api_key)
+      all_data = generateData.generateData(cityIDs,url,l)
 
-      city_name = data['city']['name']
-      weather_list = data['list']
-
-      d = []
-      index = 0
-      while index < len(weather_list):
-          temp = weather_list[index]['main']['temp']
-          speed = weather_list[index]['wind']['speed']
-          direction = weather_list[index]['wind']['deg']
-          datetime = weather_list[index]['dt_txt']
-          score = getScore.getScore(temp,speed,direction)
-          
-          tmp_dict = {}
-          tmp_dict["location"] = city_name
-          tmp_dict["datetime"] = datetime
-          tmp_dict["score"] = score
-          d.append(tmp_dict)
-          index += 1
-
-      ordered_data = sorted(d, key=itemgetter('score')) 
+      ordered_data = sorted(all_data, key=itemgetter('score')) 
       result = {'launchWindows': [ordered_data[:5]]}
 
     return jsonify(result)
